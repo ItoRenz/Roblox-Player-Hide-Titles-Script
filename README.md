@@ -1,185 +1,160 @@
-# 👁️ Roblox Hide Player Titles Script
+# 👁️ Hide Player Titles Script
 
-A lightweight and elegant Roblox script that allows you to hide all player overhead elements (names, titles, billboards, health bars) with a simple toggle button.
+A lightweight and optimized Roblox script that allows you to toggle the visibility of player titles, nametags, and overhead GUIs with a single click. Perfect for screenshots, videos, or immersive gameplay.
 
 ## ✨ Features
 
-- **🎯 Complete Hiding** - Hides all overhead elements:
-  - Player display names & usernames
-  - Health bars
-  - Custom titles and badges
-  - BillboardGui elements
-  - SurfaceGui elements
-  - All TextLabels above player heads
+- **One-Click Toggle** - Simple eye icon button to show/hide all player titles
+- **Cross-Platform** - Optimized for both Mobile and PC
+- **Hides Everything** - Removes:
+  - Custom player titles and tags
+  - Billboard GUIs above heads
+  - Default nametags and health bars
+  - Surface GUIs on character heads
+- **Smooth Animations** - Polished button interactions with hover and click effects
+- **Status Indicator** - Visual dot showing current visibility state
+- **Haptic Feedback** - Vibration feedback on mobile devices
+- **Persistent** - Automatically applies to new players joining the game
+- **Lightweight** - Minimal performance impact
 
-- **📱 Platform Optimized**
-  - Automatic detection of Mobile vs PC
-  - Different UI sizes for optimal touch/mouse experience
-  - Haptic feedback for mobile devices
-  - Smooth hover animations on PC
+## 🎮 Preview
 
-- **🎨 Modern UI Design**
-  - Sleek eye icon with smooth animations
-  - Visual status indicator (green dot = visible, red = hidden)
-  - Shadow effects and rounded corners
-  - Responsive click/touch animations
+The toggle button appears in the **top-right corner** of your screen:
+- **Green dot** = Titles visible 👁️
+- **Red dot** = Titles hidden 👁️ with slash
 
-- **⚡ Performance Optimized**
-  - Error handling with pcall() wrappers
-  - Efficient object tracking
-  - No memory leaks
-  - Automatic cleanup
+## 📦 Installation
 
-- **🔄 Dynamic Updates**
-  - Automatically applies to players who join mid-game
-  - Monitors new GUI elements added during gameplay
-  - Persists through character respawns
-
-## 🚀 Installation
-
-### Method 1: Roblox Studio (Recommended)
-
-1. Open your Roblox game in Roblox Studio
-2. Navigate to **StarterGui** in the Explorer window
-3. Insert a new **LocalScript**
+### Method 1: StarterGui (Recommended)
+1. Open Roblox Studio
+2. Navigate to `StarterGui`
+3. Insert a new `LocalScript`
 4. Copy and paste the entire script code
-5. Rename the script to "HideTitlesScript" (optional)
-6. Test in Play mode!
+5. Save and test in-game
 
 ### Method 2: StarterPlayerScripts
-
 1. Open Roblox Studio
-2. Navigate to **StarterPlayer** → **StarterPlayerScripts**
-3. Insert a new **LocalScript**
-4. Paste the script code
-5. Done!
+2. Navigate to `StarterPlayer` → `StarterPlayerScripts`
+3. Insert a new `LocalScript`
+4. Copy and paste the entire script code
+5. Save and test in-game
 
-## 📖 Usage
+## 🎯 Usage
 
-### In-Game Controls
+1. **Launch the game** - The eye icon button will appear in the top-right corner
+2. **Click the button** to toggle title visibility:
+   - First click: Hides all player titles
+   - Second click: Shows all player titles again
+3. **Status indicator** changes color based on state:
+   - 🟢 Green = Visible
+   - 🔴 Red = Hidden
 
-- **Click/Tap** the eye icon in the top-right corner to toggle visibility
-- **Green dot** = All player titles visible
-- **Red dot** = All player titles hidden
-- **Red slash** over eye = Hidden mode active
+### Mobile Users
+- Tap the eye icon to toggle
+- Button is slightly larger for easier touch interaction
+- Haptic feedback confirms your action
 
-### Platform-Specific Behavior
+### PC Users
+- Click the eye icon to toggle
+- Hover over the button for a subtle size animation
+- Smooth transitions for better UX
 
-**PC:**
-- Button size: 45x45 pixels
-- Hover animation on mouse-over
-- Expands to 50x50 on hover
+## ⚙️ Customization
 
-**Mobile:**
-- Button size: 50x50 pixels (larger for touch)
-- Haptic feedback on toggle
-- No hover effects
+You can easily customize the button position by modifying line 20:
 
-## 🎮 Compatible With
+```lua
+-- Current position (60 pixels from top)
+local buttonPosition = isMobile and UDim2.new(1, -40, 0, 60) or UDim2.new(1, -40, 0, 60)
 
-- ✅ All Roblox games
-- ✅ Mobile devices (iOS/Android)
-- ✅ PC (Windows/Mac)
-- ✅ Xbox (with gamepad)
-- ✅ VR platforms
-- ✅ Custom character models
-- ✅ All display name/title systems
+-- Examples:
+-- Higher position: UDim2.new(1, -40, 0, 20)
+-- Lower position: UDim2.new(1, -40, 0, 100)
+-- Left side: UDim2.new(0, 10, 0, 60)
+```
 
-## 🛠️ Technical Details
+### Color Customization
 
-### Script Type
-- **LocalScript** (Client-side only)
+Change button colors by modifying these lines:
 
-### Services Used
-- Players Service
-- UserInputService
-- HapticService (mobile only)
+```lua
+-- Default state (line 25)
+toggleButton.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
 
-### Features
-- Automatic platform detection
-- Error handling with pcall()
-- Dynamic GUI monitoring
-- Object state preservation for proper restore
+-- Hidden state (line 156)
+toggleButton.BackgroundColor3 = Color3.fromRGB(70, 40, 40)
+
+-- Status dot colors (lines 97 & 160)
+statusDot.BackgroundColor3 = Color3.fromRGB(80, 255, 120) -- Green
+statusDot.BackgroundColor3 = Color3.fromRGB(255, 80, 80)  -- Red
+```
+
+## 🔧 Technical Details
+
+### What Gets Hidden
+- `BillboardGui` elements
+- `SurfaceGui` elements on character heads
+- `TextLabel`, `TextButton`, `TextBox` inside Head
+- `Humanoid.DisplayDistanceType` (nametags & health bars)
+
+### Compatibility
+- ✅ Roblox PC Client
+- ✅ Roblox Mobile (iOS/Android)
+- ✅ Works with most custom title systems
+- ✅ Compatible with FilteringEnabled games
+
+### Performance
+- Minimal CPU usage
+- Uses `pcall()` for error handling
+- Efficient event listeners
+- No memory leaks
 
 ## 🐛 Troubleshooting
 
-### Script not working?
-1. Make sure the script is a **LocalScript**, not a regular Script
-2. Verify it's placed in **StarterGui** or **StarterPlayerScripts**
-3. Check the Output window for error messages
-4. Ensure FilteringEnabled is on (default in all modern games)
+**Button doesn't appear:**
+- Make sure the script is a `LocalScript`
+- Check it's placed in `StarterGui` or `StarterPlayerScripts`
+- Look for errors in the output console
 
-### Button not appearing?
-1. Check if another GUI is blocking it
-2. Try repositioning the button in the script
-3. Verify ResetOnSpawn is set to false
+**Some titles still showing:**
+- Some custom title systems may use unique methods
+- The script covers most common implementations
+- Contact the developer for specific game support
 
-### Some elements not hiding?
-- The script hides most common overhead elements
-- Some custom implementations may require script modifications
-- Check if elements are parented to Head or Character
+**Button position overlaps with other UI:**
+- Adjust the `buttonPosition` variable (line 20)
+- Move it to a different corner or location
 
-## 📝 Customization
+## 📝 Changelog
 
-### Change Button Position
+### Version 1.1
+- Lowered button position from 10px to 60px from top
+- Improved mobile touch target size
+- Added haptic feedback for mobile
 
-```lua
--- Find this line (around line 24):
-local buttonPosition = isMobile and UDim2.new(1, -70, 0, 15) or UDim2.new(1, -65, 0, 15)
-
--- Modify the values:
--- UDim2.new(X_Scale, X_Offset, Y_Scale, Y_Offset)
--- Example for top-left: UDim2.new(0, 15, 0, 15)
-```
-
-### Change Button Size
-
-```lua
--- Find this line (around line 23):
-local buttonSize = isMobile and UDim2.new(0, 50, 0, 50) or UDim2.new(0, 45, 0, 45)
-
--- Adjust the pixel values (last two numbers)
-```
-
-### Change Colors
-
-```lua
--- Button background (line 33):
-toggleButton.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
-
--- Hidden mode color (line 158):
-toggleButton.BackgroundColor3 = Color3.fromRGB(70, 40, 40)
-
--- Status indicator colors (lines 161-162, 165-166)
-```
-
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to:
-- Report bugs
-- Suggest new features
-- Submit pull requests
-- Improve documentation
+### Version 1.0
+- Initial release
+- Basic show/hide functionality
+- Cross-platform support
 
 ## 📄 License
 
-This project is free to use and modify for your Roblox games.
+This project is open source and available under the MIT License.
 
-## ⚠️ Disclaimer
+## 🤝 Contributing
 
-This script is intended for legitimate gameplay purposes. Please respect the game developers' intentions and other players' experiences. Do not use this to gain unfair advantages or violate game rules.
+Contributions, issues, and feature requests are welcome!
 
-## 🌟 Credits
+Feel free to check the [issues page](../../issues) if you want to contribute.
+
+## 👤 Author
 
 Created with ❤️ for the Roblox community
 
-## 📞 Support
+## ⭐ Show Your Support
 
-If you encounter any issues or have questions:
-1. Check the Troubleshooting section above
-2. Review the Output window for error messages
-3. Open an issue on GitHub with detailed information
+Give a ⭐️ if this project helped you!
 
 ---
 
-**Enjoy cleaner gameplay!** 👁️✨
+**Note:** This script only affects the local player's view. Other players will still see all titles normally. This is a client-side visual enhancement only.
