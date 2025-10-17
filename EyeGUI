@@ -16,9 +16,9 @@ screenGui.ResetOnSpawn = false
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = PlayerGui
 
--- Ukuran berbeda untuk mobile dan PC
-local buttonSize = isMobile and UDim2.new(0, 50, 0, 50) or UDim2.new(0, 45, 0, 45)
-local buttonPosition = isMobile and UDim2.new(1, -70, 0, 15) or UDim2.new(1, -65, 0, 15)
+-- Ukuran lebih kecil untuk mobile dan PC
+local buttonSize = isMobile and UDim2.new(0, 35, 0, 35) or UDim2.new(0, 32, 0, 32)
+local buttonPosition = isMobile and UDim2.new(1, -40, 0, 10) or UDim2.new(1, -40, 0, 10)
 
 -- Frame untuk toggle button
 local toggleButton = Instance.new("TextButton")
@@ -33,7 +33,7 @@ toggleButton.Parent = screenGui
 
 -- Rounded corners
 local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 10)
+corner.CornerRadius = UDim.new(0, 8)
 corner.Parent = toggleButton
 
 -- Shadow effect
@@ -48,7 +48,7 @@ shadow.ZIndex = 9
 shadow.Parent = toggleButton
 
 local shadowCorner = Instance.new("UICorner")
-shadowCorner.CornerRadius = UDim.new(0, 10)
+shadowCorner.CornerRadius = UDim.new(0, 8)
 shadowCorner.Parent = shadow
 
 -- Icon mata
@@ -67,7 +67,7 @@ eyeIcon.Parent = toggleButton
 -- Garis silang untuk mode "hidden"
 local crossLine = Instance.new("Frame")
 crossLine.Name = "CrossLine"
-crossLine.Size = UDim2.new(1.5, 0, 0, 3)
+crossLine.Size = UDim2.new(1.5, 0, 0, 2)
 crossLine.Position = UDim2.new(-0.25, 0, 0.5, 0)
 crossLine.AnchorPoint = Vector2.new(0, 0.5)
 crossLine.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
@@ -84,8 +84,8 @@ crossCorner.Parent = crossLine
 -- Status indicator (small dot)
 local statusDot = Instance.new("Frame")
 statusDot.Name = "StatusDot"
-statusDot.Size = UDim2.new(0, 8, 0, 8)
-statusDot.Position = UDim2.new(1, -10, 0, 2)
+statusDot.Size = UDim2.new(0, 6, 0, 6)
+statusDot.Position = UDim2.new(1, -8, 0, 2)
 statusDot.BackgroundColor3 = Color3.fromRGB(80, 255, 120)
 statusDot.BorderSizePixel = 0
 statusDot.ZIndex = 12
@@ -268,31 +268,30 @@ setupExistingPlayers()
 if not isMobile then
     toggleButton.MouseEnter:Connect(function()
         isHovering = true
-        toggleButton:TweenSize(UDim2.new(0, 50, 0, 50), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
+        toggleButton:TweenSize(UDim2.new(0, 35, 0, 35), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end)
     
     toggleButton.MouseLeave:Connect(function()
         isHovering = false
-        toggleButton:TweenSize(UDim2.new(0, 45, 0, 45), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
+        toggleButton:TweenSize(UDim2.new(0, 32, 0, 32), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end)
 end
 
 -- Animasi klik
 toggleButton.MouseButton1Down:Connect(function()
-    local targetSize = isMobile and UDim2.new(0, 45, 0, 45) or UDim2.new(0, 42, 0, 42)
+    local targetSize = isMobile and UDim2.new(0, 30, 0, 30) or UDim2.new(0, 28, 0, 28)
     toggleButton:TweenSize(targetSize, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.1, true)
 end)
 
 toggleButton.MouseButton1Up:Connect(function()
-    local targetSize = isMobile and UDim2.new(0, 50, 0, 50) or UDim2.new(0, 50, 0, 50)
+    local targetSize = isMobile and UDim2.new(0, 35, 0, 35) or UDim2.new(0, 35, 0, 35)
     toggleButton:TweenSize(targetSize, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.1, true)
     task.wait(0.1)
     
-    -- Fix: Gunakan variable isHovering yang kita track sendiri
     if not isHovering and not isMobile then
-        toggleButton:TweenSize(UDim2.new(0, 45, 0, 45), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
+        toggleButton:TweenSize(UDim2.new(0, 32, 0, 32), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     elseif isMobile then
-        toggleButton:TweenSize(UDim2.new(0, 50, 0, 50), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
+        toggleButton:TweenSize(UDim2.new(0, 35, 0, 35), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end
 end)
 
