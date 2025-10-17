@@ -18,7 +18,8 @@ screenGui.Parent = PlayerGui
 
 -- Ukuran lebih kecil untuk mobile dan PC
 local buttonSize = isMobile and UDim2.new(0, 35, 0, 35) or UDim2.new(0, 32, 0, 32)
-local buttonPosition = isMobile and UDim2.new(1, -40, 0, 10) or UDim2.new(1, -40, 0, 10)
+-- POSISI DITURUNKAN: dari 10 menjadi 60 pixels dari atas
+local buttonPosition = isMobile and UDim2.new(1, -40, 0, 60) or UDim2.new(1, -40, 0, 60)
 
 -- Frame untuk toggle button
 local toggleButton = Instance.new("TextButton")
@@ -297,4 +298,4 @@ end)
 
 print("✓ Hide Player Titles loaded successfully!")
 print("Platform:", isMobile and "Mobile" or "PC")
-print("Toggle button created at top-right corner")
+print("Toggle button created at top-right corner (lower position)")
