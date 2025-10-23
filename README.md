@@ -117,7 +117,7 @@ This script is free to use and modify for any Roblox project.
 
 ## 👤 Author
 
-**ItoRenz 00**
+**ItoRenz00**
 
 ## 🤝 Contributing
 
