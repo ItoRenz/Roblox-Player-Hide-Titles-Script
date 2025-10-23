@@ -1,138 +1,151 @@
-# Hide Player Titles Script
+# 👁️ Hide Player Titles Script
 
-A lightweight Roblox script that hides player titles, nametags, and UI elements above player heads. Optimized for both mobile and PC platforms with smooth animations.
+A Roblox LocalScript that allows players to toggle the visibility of overhead titles, nametags, and GUI elements for all players in the game.
 
-## Features
+## 🎯 Features
 
-- 🎮 **Cross-Platform Support** - Optimized for both mobile and PC devices
-- 👁️ **Toggle Button** - Easy-to-use floating button in the top-right corner
-- ✨ **Smooth Animations** - Icon rotation and pulse effects on interaction
-- 🔄 **Auto-Update** - Automatically hides titles for new players
-- 🎨 **Visual Feedback** - Color-changing button and status indicator
-- ⚡ **Lightweight** - Minimal performance impact, no lag
-- 📱 **Haptic Feedback** - Mobile vibration support
+- **Toggle Visibility**: Hide/show all player titles, nametags, and overhead GUIs with a single click
+- **Cross-Platform**: Optimized for both mobile and PC devices
+- **Smooth Animations**: Eye-catching icon rotations and button animations
+- **Visual Feedback**: Status indicator dot and cross-line overlay
+- **Haptic Feedback**: Mobile devices get haptic feedback on toggle (if supported)
+- **Automatic Detection**: Automatically applies to new players joining the game
+- **Persistent State**: Maintains visibility state across character respawns
 
-## What Gets Hidden
+## 📦 Installation
 
-- Player nametags
-- Health bars
-- BillboardGui elements
-- SurfaceGui elements
-- TextLabel, TextButton, and TextBox in player heads
-- All descendant GUI elements
+1. Open your Roblox game in Roblox Studio
+2. Navigate to `StarterGui` or `StarterPlayerScripts` in the Explorer
+3. Insert a new `LocalScript`
+4. Copy and paste the script code into the LocalScript
+5. Save and test in-game
 
-## Installation
+## 🎮 Usage
 
-1. Open your Roblox game
-2. Access **StarterGui** or **StarterPlayerScripts** in Studio
-3. Insert a new **LocalScript**
-4. Paste the script content
-5. Run the game
+Once installed, a toggle button will appear in the top-right corner of the screen:
 
-## Usage
-
-### Toggle Button
-- Click the **eye icon** button in the top-right corner to show/hide player titles
-- **Green dot** = Titles are visible
-- **Red dot** = Titles are hidden
-
-### Visual Indicators
-- **Button glows darker** when titles are hidden
-- **Icon becomes faded** when titles are hidden
-- **Red cross line** appears on the icon when hidden
-
-### Animations
-- Icon rotates 360° smoothly when toggling
-- Status dot pulses 3 times for visual feedback
-- Button scales on hover (PC only)
-- Button compresses on click
-
-## Customization
+- **Click/Tap** the eye icon to toggle visibility
+- **Green dot** = Titles visible
+- **Red dot** = Titles hidden
+- **Cross line** appears when titles are hidden
 
 ### Button Position
-Edit line 18-19 to change button position:
+
+The button is positioned 60 pixels from the top-right corner to avoid overlapping with other UI elements.
+
+### What Gets Hidden
+
+When activated, the script hides:
+- Default Roblox nametags
+- Health bars
+- BillboardGuis attached to characters
+- SurfaceGuis on character heads
+- TextLabels, TextButtons, and TextBoxes in character heads
+
+## 🔧 Configuration
+
+You can customize the script by modifying the `CONFIG` table:
+
 ```lua
-local buttonPosition = isMobile and UDim2.new(1, -40, 0, 60) or UDim2.new(1, -40, 0, 60)
+local CONFIG = {
+    BUTTON_SIZE_MOBILE = UDim2.new(0, 35, 0, 35),
+    BUTTON_SIZE_PC = UDim2.new(0, 32, 0, 32),
+    BUTTON_POSITION = UDim2.new(1, -40, 0, 60), -- X offset, Y offset
+    CORNER_RADIUS = UDim.new(0, 8),
+    ANIMATION_DURATION = 0.6,
+    PULSE_COUNT = 3,
+    PULSE_DURATION = 0.15
+}
 ```
 
-### Button Size
-Edit line 15-16:
+### Color Customization
+
+Modify the `COLORS` table to change the appearance:
+
 ```lua
-local buttonSize = isMobile and UDim2.new(0, 35, 0, 35) or UDim2.new(0, 32, 0, 32)
+local COLORS = {
+    DEFAULT_BG = Color3.fromRGB(45, 45, 50),
+    HIDDEN_BG = Color3.fromRGB(70, 40, 40),
+    ACTIVE_DOT = Color3.fromRGB(80, 255, 120),
+    INACTIVE_DOT = Color3.fromRGB(255, 80, 80),
+    CROSS_LINE = Color3.fromRGB(255, 80, 80),
+    SHADOW = Color3.fromRGB(0, 0, 0)
+}
 ```
 
-### Animation Duration
-Edit line 98:
-```lua
-animateIconRotation(0.6)  -- Change 0.6 to desired duration in seconds
-```
+## 📱 Platform Support
 
-### Colors
-Modify RGB values for:
-- Button background: Line 26
-- Hidden state color: Line 187
-- Active state color: Line 184
-- Status dot colors: Lines 188-189
+- ✅ **PC**: Full support with hover animations
+- ✅ **Mobile**: Touch-optimized with haptic feedback
+- ✅ **Tablet**: Automatically detected and optimized
 
-## Platform Detection
+## ⚙️ Technical Details
 
-The script automatically detects the platform:
-- **Mobile**: Smaller button, no hover animations, haptic feedback enabled
-- **PC**: Standard size, hover animations, keyboard/mouse optimized
+### Services Used
+- `Players` - Player management
+- `UserInputService` - Platform detection
+- `RunService` - Animation rendering
 
-## Performance
+### Performance
+- Minimal memory footprint
+- Efficient state management
+- Safe pcall error handling
+- No memory leaks
 
-- ✅ No continuous loops
-- ✅ Optimized event connections
-- ✅ Minimal memory usage
-- ✅ Efficient descendant scanning
-- ✅ Non-blocking async operations
+### Compatibility
+- Works with all Roblox games
+- Compatible with custom character models
+- Handles dynamic GUI additions
 
-## Troubleshooting
+## 🐛 Troubleshooting
 
-### Button not appearing
-- Ensure script is placed in StarterGui or StarterPlayerScripts
-- Check that ResetOnSpawn is set to false
+**Button not appearing?**
+- Ensure the script is placed in `StarterGui` or `StarterPlayerScripts`
+- Check that it's a `LocalScript`, not a regular Script
 
-### Titles not hiding
-- Verify all players have characters loaded
-- Check for custom scripts that might override GUI visibility
-- Ensure SurfaceGui is supported in your game
+**Some GUIs still showing?**
+- The script targets standard GUI types; custom implementations may require modification
+- Check if GUIs are parented to the character's Head
 
-### Performance issues
-- Reduce the number of players in the game
-- Check for conflicting scripts
-- Monitor script output for errors
+**Animation lag on mobile?**
+- Reduce `ANIMATION_DURATION` in the CONFIG table
+- Decrease `PULSE_COUNT` for fewer pulse animations
 
-## Requirements
+## 📝 License
 
-- Roblox Studio or Roblox Game
-- LocalScript permissions
-- Access to Players service
+This script is free to use and modify for any Roblox project.
 
-## Script Size
+## 👤 Author
 
-- **Minified**: ~8 KB
-- **Full version**: ~12 KB
+**ItoRenz 00**
 
-## Compatibility
+## 🤝 Contributing
 
-- ✅ All Roblox games
-- ✅ Custom game frameworks
-- ✅ Multiplayer environments
-- ✅ Mobile devices
-- ✅ PC devices
+Feel free to fork, modify, and submit improvements!
 
-## License
+### Suggested Improvements
+- Add keyboard shortcut support
+- Include customizable hotkey settings
+- Add GUI scale options
+- Implement fade transitions
+- Add sound effects toggle
 
-This script is free to use and modify for personal projects.
+## 📋 Changelog
 
-## Support
+### Version 1.0.0 (Current)
+- Initial release
+- Cross-platform support
+- Animated toggle button
+- Automatic player detection
+- Status indicator system
 
-For issues or suggestions, check the script output in the command bar for debug information.
+## ⚠️ Notes
+
+- This script only affects the local client's view
+- Other players will still see titles normally
+- Some game-specific GUIs may require additional handling
+- Respects Roblox's default humanoid display settings
 
 ---
 
-**Version**: 2.0  
-**Last Updated**: October 2025  
-**Status**: Stable
+**Made with ❤️ for the Roblox community**
