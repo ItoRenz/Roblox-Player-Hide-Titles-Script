@@ -1,0 +1,454 @@
+--[[
+    Hide Player Titles Script
+    Author: ItoRenz00
+    Description: Toggle visibility of player titles, nametags, and overhead GUIs
+    Platform: Mobile & PC Optimized
+    Usage: Place as LocalScript in StarterGui or StarterPlayerScripts
+]]
+
+-- Services
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+-- Local references
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Configuration
+local CONFIG = {
+    BUTTON_SIZE_MOBILE = UDim2.new(0, 35, 0, 35),
+    BUTTON_SIZE_PC = UDim2.new(0, 32, 0, 32),
+    BUTTON_POSITION = UDim2.new(1, -40, 0, 60), -- 60 pixels from top
+    CORNER_RADIUS = UDim.new(0, 8),
+    ANIMATION_DURATION = 0.6,
+    PULSE_COUNT = 3,
+    PULSE_DURATION = 0.15
+}
+
+local COLORS = {
+    DEFAULT_BG = Color3.fromRGB(45, 45, 50),
+    HIDDEN_BG = Color3.fromRGB(70, 40, 40),
+    ACTIVE_DOT = Color3.fromRGB(80, 255, 120),
+    INACTIVE_DOT = Color3.fromRGB(255, 80, 80),
+    CROSS_LINE = Color3.fromRGB(255, 80, 80),
+    SHADOW = Color3.fromRGB(0, 0, 0)
+}
+
+-- Platform detection
+local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+
+-- State variables
+local isHidden = false
+local hiddenObjects = {}
+local isHovering = false
+local animationRunning = false
+
+-- ============================================================================
+-- UI CREATION
+-- ============================================================================
+
+local function createScreenGui()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "HideTitlesGui"
+    screenGui.ResetOnSpawn = false
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    screenGui.Parent = PlayerGui
+    return screenGui
+end
+
+local function createToggleButton(parent)
+    local buttonSize = isMobile and CONFIG.BUTTON_SIZE_MOBILE or CONFIG.BUTTON_SIZE_PC
+    
+    local button = Instance.new("TextButton")
+    button.Name = "ToggleButton"
+    button.Size = buttonSize
+    button.Position = CONFIG.BUTTON_POSITION
+    button.BackgroundColor3 = COLORS.DEFAULT_BG
+    button.BorderSizePixel = 0
+    button.Text = ""
+    button.ZIndex = 10
+    button.Parent = parent
+    
+    -- Rounded corners
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = CONFIG.CORNER_RADIUS
+    corner.Parent = button
+    
+    return button
+end
+
+local function createShadow(parent)
+    local shadow = Instance.new("Frame")
+    shadow.Name = "Shadow"
+    shadow.Size = UDim2.new(1, 4, 1, 4)
+    shadow.Position = UDim2.new(0, -2, 0, -2)
+    shadow.BackgroundColor3 = COLORS.SHADOW
+    shadow.BackgroundTransparency = 0.6
+    shadow.BorderSizePixel = 0
+    shadow.ZIndex = 9
+    shadow.Parent = parent
+    
+    local shadowCorner = Instance.new("UICorner")
+    shadowCorner.CornerRadius = CONFIG.CORNER_RADIUS
+    shadowCorner.Parent = shadow
+    
+    return shadow
+end
+
+local function createEyeIcon(parent)
+    local eyeIcon = Instance.new("TextLabel")
+    eyeIcon.Name = "EyeIcon"
+    eyeIcon.Size = UDim2.new(0.75, 0, 0.75, 0)
+    eyeIcon.Position = UDim2.new(0.125, 0, 0.125, 0)
+    eyeIcon.BackgroundTransparency = 1
+    eyeIcon.Text = "👁"
+    eyeIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+    eyeIcon.TextScaled = true
+    eyeIcon.Font = Enum.Font.GothamBold
+    eyeIcon.ZIndex = 11
+    eyeIcon.Parent = parent
+    
+    return eyeIcon
+end
+
+local function createCrossLine(parent)
+    local crossLine = Instance.new("Frame")
+    crossLine.Name = "CrossLine"
+    crossLine.Size = UDim2.new(1.5, 0, 0, 2)
+    crossLine.Position = UDim2.new(-0.25, 0, 0.5, 0)
+    crossLine.AnchorPoint = Vector2.new(0, 0.5)
+    crossLine.BackgroundColor3 = COLORS.CROSS_LINE
+    crossLine.BorderSizePixel = 0
+    crossLine.Rotation = 45
+    crossLine.Visible = false
+    crossLine.ZIndex = 12
+    crossLine.Parent = parent
+    
+    local crossCorner = Instance.new("UICorner")
+    crossCorner.CornerRadius = UDim.new(1, 0)
+    crossCorner.Parent = crossLine
+    
+    return crossLine
+end
+
+local function createStatusDot(parent)
+    local statusDot = Instance.new("Frame")
+    statusDot.Name = "StatusDot"
+    statusDot.Size = UDim2.new(0, 6, 0, 6)
+    statusDot.Position = UDim2.new(1, -8, 0, 2)
+    statusDot.BackgroundColor3 = COLORS.ACTIVE_DOT
+    statusDot.BorderSizePixel = 0
+    statusDot.ZIndex = 12
+    statusDot.Parent = parent
+    
+    local dotCorner = Instance.new("UICorner")
+    dotCorner.CornerRadius = UDim.new(1, 0)
+    dotCorner.Parent = statusDot
+    
+    return statusDot
+end
+
+-- ============================================================================
+-- ANIMATION FUNCTIONS
+-- ============================================================================
+
+local function animateIconRotation(icon, duration)
+    if animationRunning then return end
+    animationRunning = true
+    
+    local startRotation = icon.Rotation or 0
+    local endRotation = startRotation + 360
+    local elapsedTime = 0
+    
+    while elapsedTime < duration do
+        elapsedTime = elapsedTime + RunService.RenderStepped:Wait()
+        local progress = math.min(elapsedTime / duration, 1)
+        icon.Rotation = startRotation + (endRotation - startRotation) * progress
+    end
+    
+    icon.Rotation = 0
+    animationRunning = false
+end
+
+local function animatePulse(dot)
+    local originalSize = dot.Size
+    
+    for i = 1, CONFIG.PULSE_COUNT do
+        dot:TweenSize(
+            UDim2.new(0, 8, 0, 8),
+            Enum.EasingDirection.Out,
+            Enum.EasingStyle.Quad,
+            CONFIG.PULSE_DURATION,
+            true
+        )
+        task.wait(CONFIG.PULSE_DURATION)
+        dot:TweenSize(
+            originalSize,
+            Enum.EasingDirection.Out,
+            Enum.EasingStyle.Quad,
+            CONFIG.PULSE_DURATION,
+            true
+        )
+        task.wait(CONFIG.PULSE_DURATION)
+    end
+end
+
+-- ============================================================================
+-- CORE FUNCTIONALITY
+-- ============================================================================
+
+local function hidePlayerGui(character, hide)
+    if not character then return end
+    
+    local success, err = pcall(function()
+        local head = character:FindFirstChild("Head")
+        if not head then return end
+        
+        -- Hide all BillboardGui
+        for _, descendant in pairs(character:GetDescendants()) do
+            if descendant:IsA("BillboardGui") then
+                if hide then
+                    hiddenObjects[descendant] = descendant.Enabled
+                    descendant.Enabled = false
+                else
+                    if hiddenObjects[descendant] ~= nil then
+                        descendant.Enabled = hiddenObjects[descendant]
+                        hiddenObjects[descendant] = nil
+                    end
+                end
+            end
+        end
+        
+        -- Hide default nametag and health bar
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            if hide then
+                humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+            else
+                humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer
+            end
+        end
+        
+        -- Hide all TextLabel, TextButton in Head
+        for _, obj in pairs(head:GetDescendants()) do
+            if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
+                if hide then
+                    hiddenObjects[obj] = obj.Visible
+                    obj.Visible = false
+                else
+                    if hiddenObjects[obj] ~= nil then
+                        obj.Visible = hiddenObjects[obj]
+                        hiddenObjects[obj] = nil
+                    end
+                end
+            end
+            
+            -- Hide SurfaceGui
+            if obj:IsA("SurfaceGui") then
+                if hide then
+                    hiddenObjects[obj] = obj.Enabled
+                    obj.Enabled = false
+                else
+                    if hiddenObjects[obj] ~= nil then
+                        obj.Enabled = hiddenObjects[obj]
+                        hiddenObjects[obj] = nil
+                    end
+                end
+            end
+        end
+    end)
+    
+    if not success and err then
+        warn("Error in hidePlayerGui:", err)
+    end
+end
+
+local function toggleVisibility(button, eyeIcon, crossLine, statusDot)
+    isHidden = not isHidden
+    
+    -- Animate icon rotation
+    task.spawn(function()
+        animateIconRotation(eyeIcon, CONFIG.ANIMATION_DURATION)
+    end)
+    
+    -- Update button appearance
+    if isHidden then
+        button.BackgroundColor3 = COLORS.HIDDEN_BG
+        crossLine.Visible = true
+        eyeIcon.TextColor3 = Color3.fromRGB(180, 180, 180)
+        statusDot.BackgroundColor3 = COLORS.INACTIVE_DOT
+    else
+        button.BackgroundColor3 = COLORS.DEFAULT_BG
+        crossLine.Visible = false
+        eyeIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+        statusDot.BackgroundColor3 = COLORS.ACTIVE_DOT
+    end
+    
+    -- Animate status dot pulse
+    task.spawn(function()
+        animatePulse(statusDot)
+    end)
+    
+    -- Apply to all players
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.Character then
+            hidePlayerGui(player.Character, isHidden)
+        end
+    end
+    
+    -- Haptic feedback for mobile
+    if isMobile then
+        pcall(function()
+            local HapticService = game:GetService("HapticService")
+            HapticService:SetMotor(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Small, 0.5)
+            task.wait(0.1)
+            HapticService:SetMotor(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Small, 0)
+        end)
+    end
+end
+
+local function onCharacterAdded(character)
+    if not character then return end
+    
+    local success, err = pcall(function()
+        -- Wait for all GUIs to load
+        task.wait(0.5)
+        
+        if isHidden then
+            hidePlayerGui(character, true)
+        end
+        
+        -- Monitor changes to character
+        character.DescendantAdded:Connect(function(descendant)
+            if isHidden then
+                task.wait(0.1)
+                pcall(function()
+                    if descendant:IsA("BillboardGui") or descendant:IsA("SurfaceGui") then
+                        descendant.Enabled = false
+                    elseif descendant:IsA("TextLabel") or descendant:IsA("TextButton") or descendant:IsA("TextBox") then
+                        local head = character:FindFirstChild("Head")
+                        if head and descendant:IsDescendantOf(head) then
+                            descendant.Visible = false
+                        end
+                    end
+                end)
+            end
+        end)
+    end)
+    
+    if not success and err then
+        warn("Error in onCharacterAdded:", err)
+    end
+end
+
+local function setupExistingPlayers()
+    pcall(function()
+        for _, player in pairs(Players:GetPlayers()) do
+            if player.Character then
+                onCharacterAdded(player.Character)
+            end
+            player.CharacterAdded:Connect(function(char)
+                onCharacterAdded(char)
+            end)
+        end
+    end)
+end
+
+local function setupButtonAnimations(button)
+    -- Hover animations (PC only)
+    if not isMobile then
+        button.MouseEnter:Connect(function()
+            isHovering = true
+            button:TweenSize(
+                UDim2.new(0, 35, 0, 35),
+                Enum.EasingDirection.Out,
+                Enum.EasingStyle.Quad,
+                0.15,
+                true
+            )
+        end)
+        
+        button.MouseLeave:Connect(function()
+            isHovering = false
+            button:TweenSize(
+                UDim2.new(0, 32, 0, 32),
+                Enum.EasingDirection.Out,
+                Enum.EasingStyle.Quad,
+                0.15,
+                true
+            )
+        end)
+    end
+    
+    -- Click animations
+    button.MouseButton1Down:Connect(function()
+        local targetSize = isMobile and UDim2.new(0, 30, 0, 30) or UDim2.new(0, 28, 0, 28)
+        button:TweenSize(targetSize, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.1, true)
+    end)
+    
+    button.MouseButton1Up:Connect(function()
+        local targetSize = UDim2.new(0, 35, 0, 35)
+        button:TweenSize(targetSize, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.1, true)
+        task.wait(0.1)
+        
+        if not isHovering and not isMobile then
+            button:TweenSize(
+                UDim2.new(0, 32, 0, 32),
+                Enum.EasingDirection.Out,
+                Enum.EasingStyle.Quad,
+                0.15,
+                true
+            )
+        elseif isMobile then
+            button:TweenSize(
+                UDim2.new(0, 35, 0, 35),
+                Enum.EasingDirection.Out,
+                Enum.EasingStyle.Quad,
+                0.15,
+                true
+            )
+        end
+    end)
+end
+
+-- ============================================================================
+-- INITIALIZATION
+-- ============================================================================
+
+local function initialize()
+    -- Create UI
+    local screenGui = createScreenGui()
+    local toggleButton = createToggleButton(screenGui)
+    createShadow(toggleButton)
+    local eyeIcon = createEyeIcon(toggleButton)
+    local crossLine = createCrossLine(eyeIcon)
+    local statusDot = createStatusDot(toggleButton)
+    
+    -- Setup button click handler
+    toggleButton.MouseButton1Click:Connect(function()
+        toggleVisibility(toggleButton, eyeIcon, crossLine, statusDot)
+    end)
+    
+    -- Setup animations
+    setupButtonAnimations(toggleButton)
+    
+    -- Setup existing players
+    setupExistingPlayers()
+    
+    -- Handle new players
+    Players.PlayerAdded:Connect(function(player)
+        player.CharacterAdded:Connect(function(char)
+            onCharacterAdded(char)
+        end)
+    end)
+    
+    -- Log initialization
+    print("✓ Hide Player Titles loaded successfully!")
+    print("  Author: ItoRenz 00")
+    print("  Platform:", isMobile and "Mobile" or "PC")
+    print("  Toggle button created at top-right corner")
+end
+
+-- Start the script
+initialize()
